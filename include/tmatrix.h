@@ -23,6 +23,7 @@ protected:
     size_t sz;
     T* pMem;
 public:
+
     TDynamicVector(size_t size = 1) : sz(size)
     {
         if (sz <= 0)
@@ -191,19 +192,18 @@ public:
         }
         return res;
     }
-    T operator*(const TDynamicVector& v) noexcept(noexcept(T()))
-    {
-        if (v.sz != sz)
-        {
+    T operator*(const TDynamicVector& v) {
+        if (sz != v.sz)
             throw length_error("dif sizes");
-        }
+
         T result = 0;
-        for (int i = 0; i < sz; i++) {
+
+        for (size_t i = 0; i < sz; i++) {
             result += pMem[i] * v.pMem[i];
         }
+
         return result;
     }
-
     friend void swap(TDynamicVector& lhs, TDynamicVector& rhs) noexcept
     {
         std::swap(lhs.sz, rhs.sz);
@@ -245,6 +245,25 @@ public:
     }
 
     using TDynamicVector<TDynamicVector<T>>::operator[];
+
+    size_t size() const noexcept { return sz; }
+
+    T& at(size_t ind1, size_t ind2)
+    {
+        if (ind1<0 || ind1>sz - 1 || ind2<0 || ind2>sz - 1)
+        {
+            throw out_of_range("Index error");
+        }
+        return pMem[ind1][ind2];
+    }
+    const T& at(size_t ind1, size_t ind2) const
+    {
+            if (ind1<0 || ind1>sz - 1 || ind2<0 || ind2>sz - 1)
+            {
+                throw out_of_range("Index error");
+            }
+            return pMem[ind1][ind2];
+    }
 
     // сравнение
     bool operator==(const TDynamicMatrix& m) const noexcept
@@ -296,33 +315,39 @@ public:
     // матрично-матричные операции
     TDynamicMatrix operator+(const TDynamicMatrix& m)
     {
-        //if (sz != m.sz)
-        //    throw out_of_range("dif sizes");
+        if (sz != m.sz)
+            throw out_of_range("dif sizes");
 
-        //TDynamicMatrix<T> result(sz);
-        //for (size_t i = 0; i < sz; i++)
-        //{
-        //    result[i] = pMem[i] + m.pMem[i];
-        //}
-        return TDynamicMatrix(*this + m);
+        TDynamicMatrix<T> tmp(m.size());
+        for(int i = 0; i < m.size(); ++i)
+        {
+            for (int j = 0; j < m.size(); ++j)
+            {
+                tmp[i][j] = pMem[i][j] + m[i][j];
+            }
+        }
+        return tmp;
     }
     TDynamicMatrix operator-(const TDynamicMatrix& m)
     {
-        /*if (sz != m.sz)
+        if (sz != m.sz)
             throw out_of_range("dif sizes");
-
-        TDynamicMatrix<T> result(sz);
-        for (size_t i = 0; i < sz; i++)
+        
+        TDynamicMatrix<T> tmp(m.size());
+        for (int i = 0; i < m.size(); ++i)
         {
-            result[i] = pMem[i] - m.pMem[i];
-        }*/
-        return TDynamicMatrix(*this - m);
+            for (int j = 0; j < m.size(); ++j)
+            {
+                tmp[i][j] = pMem[i][j] - m[i][j];
+            }
+        }
+        return tmp;
     }
     TDynamicMatrix operator*(const TDynamicMatrix& m)
     {
-        /*if (sz != m.sz)
+        if (sz != m.sz)
             throw out_of_range("dif sizes");
-
+        /*
         TDynamicMatrix<T> result(sz);
         for (size_t i = 0; i < sz; i++)
         {
